@@ -9,7 +9,7 @@ const Button: React.FC<IProps> = ({ children, type }) => {
   return (
     <button
       type={type}
-      className="bg-green-700 rounded px-2 py-1 text-white font-semibold text-center w-full hover:bg-green-800 transition-all duration-300 cursor-pointer"
+      className="bg-green-700 rounded px-2 py-2 text-white font-semibold text-center w-full hover:bg-green-800 transition-all duration-300 cursor-pointer"
     >
       {children}
     </button>
