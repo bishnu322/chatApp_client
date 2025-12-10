@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Input } from "../../shared/design/Input";
 import HomePageContainer from "../HomePageContainer";
-
 import { stringData } from "../../string";
 import Button from "../../shared/design/Button";
 import { useForm } from "react-hook-form";
+import axios from "axios";
+import { Link } from "react-router-dom";
 
 const { signUp } = stringData;
 
@@ -16,11 +16,33 @@ type FormValues = {
 };
 
 const SignUp = () => {
-  const { register, handleSubmit } = useForm<FormValues>();
+  const {
+    register,
+    handleSubmit,
+    formState: { isSubmitting },
+  } = useForm<FormValues>();
 
-  const onSubmit = (data: any) => {
-    console.log(data);
+  const signUpHandler = async (data: FormValues) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/signup",
+        data
+      );
+
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.log("Something went wrong!", error);
+    }
   };
+
+  const onSubmit = (data: FormValues) => {
+    if (!data.email || !data.password || !data.userName)
+      return alert("username, password and email fields cannot be empty!");
+    // console.log(data);
+    signUpHandler(data);
+  };
+
   return (
     <HomePageContainer>
       <form className="flex flex-col gap-1" onSubmit={handleSubmit(onSubmit)}>
@@ -47,22 +69,20 @@ const SignUp = () => {
           {...register("password")}
         />
 
-        <Input
-          label={signUp.confirmPassword.label}
-          placeholder={signUp.confirmPassword.placeholder}
-          id={signUp.confirmPassword.id}
-          type={signUp.confirmPassword.type}
-          {...register("confirmPassword")}
-        />
-
         <div className="mt-2 mb-4">
           <Button type="submit">
-            {/* {isSubmitting
-            ? `${stringData.button.loginButton.submitting}`
-            : `${stringData.button.loginButton.submit}`} */}
-            Sign Up
+            {isSubmitting
+              ? `${stringData.button.signUpButton.submitting}`
+              : `${stringData.button.signUpButton.signUp}`}
           </Button>
         </div>
+
+        <Link
+          to={"/"}
+          className="text-blue-500 text-sm cursor-pointer text-center underline"
+        >
+          {stringData.login.link}
+        </Link>
       </form>
     </HomePageContainer>
   );

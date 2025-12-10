@@ -8,20 +8,24 @@ export const stringData = {
       submit: "Submit",
     },
 
-    signUpButton: "Sign Up",
+    signUpButton: {
+      submitting: "Submitting",
+      signUp: "Sign Up",
+    },
   },
   login: {
+    link: "already have account",
     email: {
       label: "Enter email: ",
       placeholder: "Enter email address",
       id: "email",
-      type: "text",
+      type: "email",
     },
     password: {
       label: "Enter Password: ",
       placeholder: "Enter password ",
       id: "password",
-      type: "text",
+      type: "password",
     },
   },
 
@@ -37,14 +41,14 @@ export const stringData = {
       label: "Enter email: ",
       placeholder: "Enter email address",
       id: "email",
-      type: "text",
+      type: "email",
     },
 
     password: {
       label: "Enter Password: ",
       placeholder: "Enter password ",
       id: "password",
-      type: "text",
+      type: "password",
     },
     confirmPassword: {
       label: "Confirm Password: ",

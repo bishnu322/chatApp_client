@@ -1,8 +1,11 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "../../shared/design/Button";
 import { Input } from "../../shared/design/Input";
 import { stringData } from "../../string";
 import { useForm } from "react-hook-form";
+import axios from "axios";
+import { useAuthStore } from "../../shared/store/userStore";
+// import { useAuthStore } from "../../shared/store/userStore";
 
 const { login } = stringData;
 
@@ -12,15 +15,41 @@ type FormValues = {
 };
 
 const Login = () => {
+  const navigate = useNavigate();
+  const { setUser } = useAuthStore();
+
   const {
     register,
     handleSubmit,
     formState: { isSubmitting },
   } = useForm<FormValues>();
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onSubmit = (data: any) => {
-    console.log(data);
+  const loginHandler = async (data: FormValues) => {
+    try {
+      const response = await axios.post(
+        "http://localhost:3000/api/auth/login",
+        data,
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (response.data.success) {
+        setUser(response.data);
+        navigate("/chat", { replace: true });
+      }
+
+      return response.data;
+    } catch (error) {
+      console.log("login failed", error);
+    }
+  };
+
+  const onSubmit = (data: FormValues) => {
+    if (!data.email || !data.password)
+      return alert("Email and Password filed cannot be empty!");
+
+    loginHandler(data);
   };
 
   return (
