@@ -1,11 +1,14 @@
-import React from "react";
+import { useAuth } from "../../context/AuthContext";
 
 const img =
   "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80";
 
 const Message = () => {
+  const { user } = useAuth();
+
+  console.log(user);
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex flex-col h-screen">
       {/* Header - Fixed height */}
       <div className="flex gap-4 bg-white px-6 py-4 items-center shadow-sm border-b border-gray-200">
         <div>
@@ -16,7 +19,9 @@ const Message = () => {
           />
         </div>
         <div className="flex flex-col">
-          <h2 className="font-semibold text-gray-800 text-lg">Your Name</h2>
+          <h2 className="font-semibold text-gray-800 text-lg">
+            {user?.userName}
+          </h2>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <p className="text-sm text-gray-500">Online</p>
@@ -25,8 +30,8 @@ const Message = () => {
       </div>
 
       {/* Body - Takes remaining space */}
-      <div className="flex-1 bg-gradient-to-br from-gray-50 to-gray-100 overflow-y-auto p-6">
-        <div className="max-w-4xl mx-auto space-y-4">
+      <div className="flex-1 bg-liner-to-br  overflow-y-auto p-6">
+        <div className="max-w-4xl">
           {/* Sample received message */}
           <div className="flex items-start gap-3">
             <img

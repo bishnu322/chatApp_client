@@ -10,7 +10,7 @@ const ChatLayout = () => {
       </div> */}
 
       <div className="grid grid-cols-5 h-screen">
-        <div className="col-span-2  border-r-2">
+        <div className="col-span-2  border-r">
           {/* userdata */}
           <UserData />
         </div>

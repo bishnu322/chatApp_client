@@ -4,8 +4,8 @@ import { Input } from "../../shared/design/Input";
 import { stringData } from "../../string";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { useAuthStore } from "../../shared/store/userStore";
-// import { useAuthStore } from "../../shared/store/userStore";
+
+import { useAuth } from "../../context/AuthContext";
 
 const { login } = stringData;
 
@@ -16,7 +16,7 @@ type FormValues = {
 
 const Login = () => {
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { setUser } = useAuth();
 
   const {
     register,
@@ -35,6 +35,7 @@ const Login = () => {
       );
 
       if (response.data.success) {
+        localStorage.setItem("user", JSON.stringify(response.data));
         setUser(response.data);
         navigate("/chat", { replace: true });
       }

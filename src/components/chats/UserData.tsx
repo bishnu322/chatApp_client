@@ -1,4 +1,5 @@
 import React from "react";
+import { useAuth } from "../../context/AuthContext";
 
 const img =
   "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80";
@@ -23,13 +24,22 @@ const userDatas = [
 ];
 
 const UserData = () => {
+  const { logoutUser } = useAuth();
   return (
     <div className="flex flex-col h-screen bg-linear-to-br from-gray-50 to-gray-100">
       {/* Header Section */}
       <div className="p-4 bg-white shadow-sm border-b border-gray-200">
-        <h3 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-4">
-          Chat Nepal
-        </h3>
+        <div className="flex  justify-between items-center">
+          <h3 className="text-2xl font-bold bg-linear-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            Chat Nepal
+          </h3>
+          <button
+            onClick={logoutUser}
+            className="px-2 py-1 bg-red-600 rounded text-gray-100 font-semibold"
+          >
+            logout
+          </button>
+        </div>
 
         {/* Search Bar */}
         <div className="flex gap-3">
