@@ -1,30 +1,33 @@
-import React from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useChat, type IUsers } from "../../context/chatContext";
 
 const img =
   "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80";
 
-const userDatas = [
-  {
-    userName: "Bishnu",
-    message: "Hey! How are you?",
-  },
-  {
-    userName: "Ramesh",
-    message: "Let's meet tomorrow",
-  },
-  {
-    userName: "Sita",
-    message: "Thanks for your help!",
-  },
-  {
-    userName: "Krishna",
-    message: "Good morning!",
-  },
-];
+export interface IUserDetail {
+  _id: string;
+  chatName: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const UserData = () => {
   const { logoutUser } = useAuth();
+  const { chat } = useChat();
+  const { user } = useAuth();
+
+  const friend: IUsers[] = [];
+
+  chat?.forEach((userData) => {
+    userData.users.forEach((singleUser) => {
+      // console.log({ singleUser });
+
+      if (singleUser._id !== user?._id) {
+        friend.push(singleUser);
+      }
+    });
+  });
+
   return (
     <div className="flex flex-col h-screen bg-linear-to-br from-gray-50 to-gray-100">
       {/* Header Section */}
@@ -62,16 +65,16 @@ const UserData = () => {
 
       {/* Chat List - Scrollable */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {userDatas.map((user, i) => (
+        {friend.map((user) => (
           <div
-            key={i}
+            key={user._id}
             className="flex items-center gap-4 bg-white hover:bg-violet-50 
                      p-4 rounded-xl cursor-pointer transition-all duration-200
                      border border-gray-100 hover:border-violet-200 hover:shadow-md
                      group"
           >
             {/* Profile Image */}
-            <div className="flex-shrink-0">
+            <div className="shrink-0">
               <img
                 src={img}
                 alt={`${user.userName}'s profile`}
@@ -88,7 +91,7 @@ const UserData = () => {
               >
                 {user.userName}
               </h2>
-              <p className="text-sm text-gray-500 truncate">{user.message}</p>
+              {/* <p className="text-sm text-gray-500 truncate">{user.message}</p> */}
             </div>
 
             {/* Online Indicator (Optional) */}
