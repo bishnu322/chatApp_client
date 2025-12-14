@@ -65,7 +65,7 @@ const UserData = () => {
         </div>
       </div>
 
-      {/* Chat List - Scrollable */}
+      {/* Chat List */}
       <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-200">
         {friends.map((user) => (
           <div
