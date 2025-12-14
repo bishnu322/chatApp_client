@@ -9,6 +9,7 @@ const AddFriendPage = () => {
   const [allUser, setAllUser] = useState<IUser[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchingData, setSearchingData] = useState("");
+  // const [userId, setUserId] = useState("");
 
   // memoize function
   const searchDataFun = useCallback((searchValue: string) => {
@@ -44,6 +45,26 @@ const AddFriendPage = () => {
     fetchingAllUser();
   }, [searchingData, user]);
 
+  const createChat = async (friendId: string) => {
+    try {
+      if (!user?._id) return;
+
+      const response = await axios.post(
+        `http://localhost:3000/api/chat`,
+        {
+          firstId: user._id,
+          secondId: friendId,
+        },
+        { withCredentials: true }
+      );
+
+      if (response.data.success) {
+        console.log("chat is created...");
+      }
+    } catch (error) {
+      console.log("something went wrong while adding friend", error);
+    }
+  };
   return (
     <main className="flex flex-col gap-8">
       <div className="bg-white p-4">
@@ -53,7 +74,7 @@ const AddFriendPage = () => {
       {isLoading ? (
         <div>Loading...</div>
       ) : (
-        <AddFriendCard registeredUser={allUser} />
+        <AddFriendCard registeredUser={allUser} createChat={createChat} />
       )}
     </main>
   );

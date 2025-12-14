@@ -6,7 +6,7 @@ const img =
 const { addFriend } = stringData;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const AddFriendCard = ({ registeredUser }: any) => {
+const AddFriendCard = ({ registeredUser, createChat }: any) => {
   return (
     <div className="grid md:grid-cols-5 gap-2 sm:grid-cols-3 p-2">
       {registeredUser.length < 1 ? (
@@ -27,7 +27,10 @@ const AddFriendCard = ({ registeredUser }: any) => {
             </div>
             <div>
               <h4 className="text-lg font-semibold">{user.userName}</h4>
-              <button className="bg-violet-600 text-gray-100 font-semibold px-2 py-1 text-sm rounded hover:bg-violet-700 hover:cursor-pointer">
+              <button
+                onClick={() => createChat(user._id)}
+                className="bg-violet-600 text-gray-100 font-semibold px-2 py-1 text-sm rounded hover:bg-violet-700 hover:cursor-pointer"
+              >
                 {addFriend.AddFriend}
               </button>
             </div>
