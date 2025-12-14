@@ -1,5 +1,7 @@
-import { useAuth } from "../../context/AuthContext";
-import { useChat, type IUsers } from "../../context/chatContext";
+import { useEffect, useState } from "react";
+import { useAuth } from "../../../context/AuthContext";
+import { useChat, type IUsers } from "../../../context/chatContext";
+import AddFriendSection from "./AddFriend";
 
 const img =
   "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80";
@@ -16,18 +18,18 @@ const UserData = () => {
   const { chat } = useChat();
   const { user } = useAuth();
 
-  const friend: IUsers[] = [];
+  const [friends, setFriends] = useState<IUsers[]>([]);
 
-  chat?.forEach((userData) => {
-    userData.users.forEach((singleUser) => {
-      // console.log({ singleUser });
+  useEffect(() => {
+    if (!chat || !user) return;
 
-      if (singleUser._id !== user?._id) {
-        friend.push(singleUser);
-      }
-    });
-  });
+    const extractedFriends = chat.flatMap((userData) =>
+      userData.users.filter((singleUser) => singleUser._id !== user._id)
+    );
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFriends(extractedFriends);
+  }, [chat, user]);
   return (
     <div className="flex flex-col h-screen bg-linear-to-br from-gray-50 to-gray-100">
       {/* Header Section */}
@@ -64,8 +66,8 @@ const UserData = () => {
       </div>
 
       {/* Chat List - Scrollable */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {friend.map((user) => (
+      <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-200">
+        {friends.map((user) => (
           <div
             key={user._id}
             className="flex items-center gap-4 bg-white hover:bg-violet-50 
@@ -101,6 +103,9 @@ const UserData = () => {
           </div>
         ))}
       </div>
+
+      {/* add friend section */}
+      <AddFriendSection />
     </div>
   );
 };

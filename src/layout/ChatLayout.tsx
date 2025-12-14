@@ -1,5 +1,5 @@
-import UserData from "../components/chats/UserData";
-import Message from "../components/chats/Message";
+import Message from "../components/chats/message_section/Message";
+import UserData from "../components/chats/user_section/UserData";
 
 const ChatLayout = () => {
   return (

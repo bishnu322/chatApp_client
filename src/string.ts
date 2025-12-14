@@ -57,4 +57,8 @@ export const stringData = {
       type: "text",
     },
   },
+
+  addFriend: {
+    AddFriend: "Add Friend",
+  },
 };

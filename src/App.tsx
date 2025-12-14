@@ -4,6 +4,7 @@ import SignUp from "./components/Auth/SignUp";
 import ChatPage from "./pages/ChatPage";
 import { useAuth } from "./context/AuthContext";
 import { ChatContextProvider } from "./context/chatContext";
+import AddFriendPage from "./pages/AddFriendPage";
 // import { useEffect, useState } from "react";
 // import axios from "axios";
 // import { useAuthStore } from "./shared/store/userStore";
@@ -52,6 +53,10 @@ const App = () => {
             <Route
               path={"/chat"}
               element={user ? <ChatPage /> : <HomePage />}
+            />
+            <Route
+              path={"/addFriend"}
+              element={user ? <AddFriendPage /> : <HomePage />}
             />
           </Routes>
         </BrowserRouter>
