@@ -1,136 +1,177 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
+import { useAuth } from "../../../context/AuthContext";
 
 const img =
-  "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80";
+  "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
 
-interface IResponseTimeStamps {
+interface IBaseTimestamps {
   _id: string;
   createdAt: string;
   updatedAt: string;
 }
-interface ISender {
+
+interface IUser {
   _id: string;
   userName: string;
   email: string;
 }
-interface IChat extends IResponseTimeStamps {
-  users: string[];
+
+interface IChat {
+  _id: string;
+  users: IUser[];
 }
 
-interface IMessage extends IResponseTimeStamps {
-  senderId: ISender[];
+interface IMessage extends IBaseTimestamps {
+  senderId: IUser;
   chatId: IChat;
   text: string;
 }
 
-const Message = ({ fetchingChatData }) => {
-  const [userMessage, setUserMessage] = useState<IMessage | null>(null);
-  const [isMessageLoading, setIsMessageLoading] = useState(false);
+interface IMessageProps {
+  fetchingChatData?: IChat | null;
+}
 
-  // console.log("fetchingid", fetchingChatData?._id);
+const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
+  const { user } = useAuth();
 
-  const fetchingUserChatMessage = useCallback(async (chatId?: string) => {
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [textMessage, setTextMessage] = useState("");
+
+  //  finding friend data to show friends userName in  heading
+  const friend = fetchingChatData?.users.find((u) => u._id !== user?._id);
+  const senderId = user?._id;
+
+  //  fetching message using chat id
+  const fetchMessages = useCallback(async (chatId?: string) => {
     if (!chatId) return;
+
     try {
-      setIsMessageLoading(true);
+      setIsLoading(true);
       const response = await axios.get(
         `http://localhost:3000/api/message/${chatId}`,
         { withCredentials: true }
       );
 
-      if (!response.data.success) return null;
+      if (!response.data?.success) return;
 
-      setUserMessage(response.data.data);
+      setMessages(response.data.data);
     } catch (error) {
-      console.log("fetching user message failed!", error);
+      console.error("fetching user message failed!", error);
     } finally {
-      setIsMessageLoading(false);
+      setIsLoading(false);
     }
   }, []);
 
-  console.log({ userMessage });
-
   useEffect(() => {
-    fetchingUserChatMessage(fetchingChatData?._id);
-  }, [fetchingChatData?._id, fetchingUserChatMessage]);
+    if (fetchingChatData?._id) {
+      fetchMessages(fetchingChatData._id);
+    }
+  }, [fetchingChatData?._id, fetchMessages]);
+
+  // if fetching Chat Data is empty
+  if (!fetchingChatData) {
+    return (
+      <div className="h-full flex items-center justify-center text-gray-500">
+        Select a chat to start messaging 💬
+      </div>
+    );
+  }
+
+  // creating message
+
+  const creatingMessage = async (chatId: string, text: string) => {
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/api/message`,
+        { senderId, chatId, text },
+        { withCredentials: true }
+      );
+
+      if (!response.data.success) return null;
+    } catch (error) {
+      console.log("unable to create message", error);
+    }
+  };
+
+  console.log({ textMessage });
 
   return (
     <div className="flex flex-col h-screen">
-      {/* Header - Fixed height */}
-      <div className="flex gap-4 bg-white px-6 py-4 items-center shadow-sm border-b border-gray-200">
+      {/* HEADER */}
+      <div className="flex gap-4 bg-white px-6 py-4 items-center border-b">
+        <img src={img} className="w-12 h-12 rounded-full" />
         <div>
-          <img
-            src={img}
-            alt="profile_img"
-            className="w-14 h-14 rounded-full object-cover ring-2 ring-gray-200"
-          />
-        </div>
-        <div className="flex flex-col">
-          <h2 className="font-semibold text-gray-800 text-lg">Friend's Name</h2>
-          <div className="flex items-center gap-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <p className="text-sm text-gray-500">Online</p>
-          </div>
+          <h2 className="font-semibold text-lg">
+            {friend?.userName || "Unknown User"}
+          </h2>
+          <p className="text-sm text-gray-500">Online</p>
         </div>
       </div>
 
-      {/* Body - Takes remaining space */}
-      <div className="flex-1 bg-liner-to-br  overflow-y-auto p-6">
-        <div className="max-w-4xl">
-          {/* Sample received message */}
-          <div className="flex items-start gap-3">
-            <img
-              src={img}
-              alt="sender"
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200"
-            />
-            <div className="bg-white px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-200 max-w-md">
-              <p className="text-gray-700">Hey! How are you doing?</p>
-              <span className="text-xs text-gray-400 mt-1 block">10:30 AM</span>
-            </div>
-          </div>
+      {/* MESSAGES */}
+      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-100">
+        {isLoading && <div>Loading messages...</div>}
 
-          {/* Sample sent message */}
-          <div className="flex items-start gap-3 justify-end">
-            <div className="bg-violet-600 px-4 py-3 rounded-2xl rounded-tr-sm shadow-sm max-w-md">
-              <p className="text-white">I'm doing great! Thanks for asking.</p>
-              <span className="text-xs text-violet-200 mt-1 block text-right">
-                10:32 AM
-              </span>
-            </div>
+        {!isLoading && messages.length === 0 && (
+          <div className="text-center text-gray-500">
+            No messages yet. Start chatting 👋
           </div>
+        )}
 
-          {/* Sample received message */}
-          <div className="flex items-start gap-3">
-            <img
-              src={img}
-              alt="sender"
-              className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-200"
-            />
-            <div className="bg-white px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm border border-gray-200 max-w-md">
-              <p className="text-gray-700">
-                That's wonderful! Want to catch up later?
-              </p>
-              <span className="text-xs text-gray-400 mt-1 block">10:33 AM</span>
+        {messages.map((msg) => {
+          const isOwnMessage = msg.senderId._id === user?._id;
+
+          return (
+            <div
+              key={msg._id}
+              className={`flex items-end gap-3 ${
+                isOwnMessage ? "justify-end" : "justify-start"
+              }`}
+            >
+              {!isOwnMessage && (
+                <img src={img} className="w-8 h-8 rounded-full" />
+              )}
+
+              <div
+                className={`max-w-md px-4 py-2 rounded-2xl text-sm shadow
+                  ${
+                    isOwnMessage
+                      ? "bg-violet-600 text-white rounded-br-sm"
+                      : "bg-white text-gray-800 rounded-bl-sm border"
+                  }`}
+              >
+                <p>{msg.text}</p>
+                <span
+                  className={`block text-xs mt-1 ${
+                    isOwnMessage ? "text-violet-200" : "text-gray-400"
+                  }`}
+                >
+                  {new Date(msg.createdAt).toLocaleTimeString()}
+                </span>
+              </div>
+
+              {isOwnMessage && (
+                <img src={img} className="w-8 h-8 rounded-full" />
+              )}
             </div>
-          </div>
-        </div>
+          );
+        })}
       </div>
 
-      {/* Footer - Fixed height */}
-      <div className="flex gap-3 bg-white px-6 py-4 items-center shadow-sm border-t border-gray-200">
+      {/* INPUT */}
+      <div className="flex gap-3 bg-white px-6 py-4 border-t">
         <input
           type="text"
           placeholder="Type a message..."
-          className="flex-1 px-4 py-3 rounded-lg border border-gray-300 
-                   focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent
-                   placeholder-gray-400 text-gray-700 transition-all"
+          defaultValue={textMessage}
+          className="flex-1 px-4 py-2 border rounded-lg"
+          onChange={(e) => setTextMessage(e.target.value)}
         />
         <button
-          className="px-6 py-3 bg-violet-600 text-white rounded-lg font-semibold 
-                         hover:bg-violet-700 active:scale-95 transition-all shadow-sm
-                         hover:shadow-md"
+          className="px-6 py-2 bg-violet-600 text-white rounded-lg"
+          onClick={() => creatingMessage(fetchingChatData._id, textMessage)}
         >
           Send
         </button>

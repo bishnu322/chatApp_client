@@ -47,7 +47,7 @@ const ChatLayout = () => {
     [user?._id]
   );
 
-  console.log({ fetchingChatData });
+  console.log({ fetchingChatData, isLoadingSingleUserChat });
 
   return (
     <div className="h-screen w-full">
