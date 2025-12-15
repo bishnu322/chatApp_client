@@ -1,12 +1,60 @@
-import { useAuth } from "../../../context/AuthContext";
+import axios from "axios";
+import { useCallback, useEffect, useState } from "react";
 
 const img =
   "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_hybrid&w=740&q=80";
 
-const Message = () => {
-  const { user } = useAuth();
+interface IResponseTimeStamps {
+  _id: string;
+  createdAt: string;
+  updatedAt: string;
+}
+interface ISender {
+  _id: string;
+  userName: string;
+  email: string;
+}
+interface IChat extends IResponseTimeStamps {
+  users: string[];
+}
 
-  console.log(user);
+interface IMessage extends IResponseTimeStamps {
+  senderId: ISender[];
+  chatId: IChat;
+  text: string;
+}
+
+const Message = ({ fetchingChatData }) => {
+  const [userMessage, setUserMessage] = useState<IMessage | null>(null);
+  const [isMessageLoading, setIsMessageLoading] = useState(false);
+
+  // console.log("fetchingid", fetchingChatData?._id);
+
+  const fetchingUserChatMessage = useCallback(async (chatId?: string) => {
+    if (!chatId) return;
+    try {
+      setIsMessageLoading(true);
+      const response = await axios.get(
+        `http://localhost:3000/api/message/${chatId}`,
+        { withCredentials: true }
+      );
+
+      if (!response.data.success) return null;
+
+      setUserMessage(response.data.data);
+    } catch (error) {
+      console.log("fetching user message failed!", error);
+    } finally {
+      setIsMessageLoading(false);
+    }
+  }, []);
+
+  console.log({ userMessage });
+
+  useEffect(() => {
+    fetchingUserChatMessage(fetchingChatData?._id);
+  }, [fetchingChatData?._id, fetchingUserChatMessage]);
+
   return (
     <div className="flex flex-col h-screen">
       {/* Header - Fixed height */}
@@ -19,9 +67,7 @@ const Message = () => {
           />
         </div>
         <div className="flex flex-col">
-          <h2 className="font-semibold text-gray-800 text-lg">
-            {user?.userName}
-          </h2>
+          <h2 className="font-semibold text-gray-800 text-lg">Friend's Name</h2>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
             <p className="text-sm text-gray-500">Online</p>

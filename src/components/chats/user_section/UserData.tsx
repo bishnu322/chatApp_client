@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useChat, type IUsers } from "../../../context/chatContext";
 import AddFriendSection from "./AddFriend";
@@ -12,13 +12,18 @@ export interface IUserDetail {
   createdAt: string;
   updatedAt: string;
 }
+interface IProps {
+  fetchingSingleChat: (userId: string) => void;
+}
 
-const UserData = () => {
+const UserData: React.FC<IProps> = ({ fetchingSingleChat }) => {
   const { logoutUser } = useAuth();
   const { chat } = useChat();
   const { user } = useAuth();
 
   const [friends, setFriends] = useState<IUsers[]>([]);
+
+  // console.log({ chat });
 
   useEffect(() => {
     if (!chat || !user) return;
@@ -74,6 +79,7 @@ const UserData = () => {
                      p-4 rounded-xl cursor-pointer transition-all duration-200
                      border border-gray-100 hover:border-violet-200 hover:shadow-md
                      group"
+            onClick={() => fetchingSingleChat(user._id)}
           >
             {/* Profile Image */}
             <div className="shrink-0">
