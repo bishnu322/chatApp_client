@@ -17,29 +17,35 @@ interface IChatFind {
 
 const ChatLayout = () => {
   const { user } = useAuth();
+
   const [isLoadingSingleUserChat, setIsLoadingSingleUserChat] = useState(false);
   const [fetchingChatData, setFetchingChatData] = useState<IChatFind | null>(
     null
   );
 
-  // Fetch single chat on demand
+  // 👇 mobile message visibility
+  const [showMessageMobile, setShowMessageMobile] = useState(false);
+
   const fetchingSingleChat = useCallback(
     async (userId: string) => {
-      if (!userId) return;
+      if (!userId || !user?._id) return;
 
       try {
         setIsLoadingSingleUserChat(true);
 
         const response = await axios.get(
-          `http://localhost:3000/api/chat/find/${userId}/${user?._id}`,
+          `http://localhost:3000/api/chat/find/${userId}/${user._id}`,
           { withCredentials: true }
         );
 
         if (!response.data.success) return;
 
         setFetchingChatData(response.data.data);
+
+        // 👇 open message page on mobile
+        setShowMessageMobile(true);
       } catch (error) {
-        console.log("Fetching single chat failed!", error);
+        console.error("Fetching single chat failed!", error);
       } finally {
         setIsLoadingSingleUserChat(false);
       }
@@ -47,20 +53,28 @@ const ChatLayout = () => {
     [user?._id]
   );
 
-  console.log({ fetchingChatData, isLoadingSingleUserChat });
-
   return (
-    <div className="h-screen w-full">
-      <div className="grid grid-cols-4 h-screen">
-        {/* Left panel: user list */}
-        <div className="col-span-1 border-r">
-          <UserData fetchingSingleChat={fetchingSingleChat} />
-        </div>
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-1 h-screen">
+      {/* user list mobile responsive */}
+      <div
+        className={`md:col-span-1 border-r ${
+          showMessageMobile ? "hidden md:block" : "block"
+        }`}
+      >
+        <UserData fetchingSingleChat={fetchingSingleChat} />
+      </div>
 
-        {/* Right panel: messages */}
-        <div className="col-span-3">
-          <Message fetchingChatData={fetchingChatData} />
-        </div>
+      {/* message section mobile responsive */}
+      <div
+        className={`md:col-span-3 ${
+          showMessageMobile ? "block" : "hidden md:block"
+        }`}
+      >
+        <Message
+          fetchingChatData={fetchingChatData}
+          isLoading={isLoadingSingleUserChat}
+          onBack={() => setShowMessageMobile(false)}
+        />
       </div>
     </div>
   );

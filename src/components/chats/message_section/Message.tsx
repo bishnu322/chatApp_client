@@ -5,6 +5,7 @@ import { useChat } from "../../../context/chatContext";
 
 const img =
   "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
+
 interface IBaseTimestamps {
   _id: string;
   createdAt: string;
@@ -30,6 +31,7 @@ interface IMessage extends IBaseTimestamps {
 
 interface IMessageProps {
   fetchingChatData?: IChat | null;
+  onBack?: () => void;
 }
 
 interface ISocketMessage {
@@ -37,16 +39,18 @@ interface ISocketMessage {
   message: IMessage;
 }
 
-const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
+const Message: React.FC<IMessageProps> = ({ fetchingChatData, onBack }) => {
   const { user } = useAuth();
   const { socket } = useChat();
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [textMessage, setTextMessage] = useState("");
+
   // finding friend
   const friend = fetchingChatData?.users.find((u) => u._id !== user?._id);
-  // fetching all the message  related to chatId
+
+  // fetching all messages related to chatId
   const fetchMessages = useCallback(async (chatId?: string) => {
     if (!chatId) return;
 
@@ -67,14 +71,14 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
     }
   }, []);
 
-  //  loading when chat are changing
+  // load messages when chat changes
   useEffect(() => {
     if (fetchingChatData?._id) {
       fetchMessages(fetchingChatData._id);
     }
   }, [fetchingChatData?._id, fetchMessages]);
 
-  // socket is receiving message
+  // socket receiving message
   useEffect(() => {
     if (!socket) return;
 
@@ -108,11 +112,9 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
 
       const newMessage: IMessage = response.data.data;
 
-      // ✅ Update sender UI instantly
       setMessages((prev) => [...prev, newMessage]);
       setTextMessage("");
 
-      // ✅ Send message via socket
       if (friend?._id) {
         socket?.emit("sendMessage", {
           senderId: user._id,
@@ -125,7 +127,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
     }
   };
 
-  // when no chat is selected
+  // when no chat selected
   if (!fetchingChatData) {
     return (
       <div className="h-full flex items-center justify-center text-gray-500">
@@ -136,9 +138,17 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
 
   return (
     <div className="flex flex-col h-screen">
-      {/* header ui */}
+      {/* ================= HEADER UI (UNCHANGED + BACK BUTTON) ================= */}
       <div className="flex gap-4 bg-white px-6 py-4 items-center border-b">
+        {/* ✅ Mobile Back Button */}
+        {onBack && (
+          <button onClick={onBack} className="md:hidden text-lg font-semibold">
+            ←
+          </button>
+        )}
+
         <img src={img} className="w-12 h-12 rounded-full" />
+
         <div>
           <h2 className="font-semibold text-lg">
             {friend?.userName || "Unknown User"}
@@ -147,7 +157,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
         </div>
       </div>
 
-      {/* message ui */}
+      {/* ================= MESSAGE UI (UNCHANGED) ================= */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-100">
         {isLoading && <div>Loading messages...</div>}
 
@@ -193,7 +203,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
         })}
       </div>
 
-      {/* input ui */}
+      {/* ================= INPUT UI (UNCHANGED) ================= */}
       <div className="flex gap-3 bg-white px-6 py-4 border-t">
         <input
           type="text"
@@ -204,7 +214,6 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
           onKeyDown={(e) => e.key === "Enter" && creatingMessage()}
         />
 
-        {/* button for sending message  */}
         <button
           className="px-6 py-2 bg-violet-600 text-white rounded-lg"
           onClick={creatingMessage}

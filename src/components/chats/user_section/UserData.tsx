@@ -54,7 +54,7 @@ const UserData: React.FC<IProps> = ({ fetchingSingleChat }) => {
               className="flex items-center gap-4 bg-white p-4 rounded-xl cursor-pointer
                          hover:bg-violet-50 border transition"
             >
-              {/* Avatar */}
+              {/* image  */}
               <img
                 src={img}
                 alt={friend.userName}

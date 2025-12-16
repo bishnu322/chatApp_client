@@ -13,6 +13,7 @@
     "@tailwindcss/vite": "^4.1.17",
     "@types/axios": "^0.9.36",
     "axios": "^1.13.2",
+    "lucide-react": "^0.561.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.68.0",
