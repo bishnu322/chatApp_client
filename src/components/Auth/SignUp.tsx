@@ -29,7 +29,6 @@ const SignUp = () => {
         data
       );
 
-      console.log(response.data);
       return response.data;
     } catch (error) {
       console.log("Something went wrong!", error);
@@ -39,7 +38,7 @@ const SignUp = () => {
   const onSubmit = (data: FormValues) => {
     if (!data.email || !data.password || !data.userName)
       return alert("username, password and email fields cannot be empty!");
-    // console.log(data);
+
     signUpHandler(data);
   };
 

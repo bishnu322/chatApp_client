@@ -4,7 +4,6 @@ import { Input } from "../../shared/design/Input";
 import { stringData } from "../../string";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-
 import { useAuth } from "../../context/AuthContext";
 
 const { login } = stringData;
@@ -36,7 +35,7 @@ const Login = () => {
 
       if (response.data.success) {
         localStorage.setItem("user", JSON.stringify(response.data));
-        setUser(response.data);
+        setUser(response.data.data);
         navigate("/chat", { replace: true });
       }
 

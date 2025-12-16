@@ -19,8 +19,6 @@ const SearchSection: React.FC<IProps> = ({ searchDataFun }) => {
 
   // run search AFTER debounce
   useEffect(() => {
-    if (!searchData) return;
-
     searchDataFun(searchData);
   }, [searchData, searchDataFun]);
 
@@ -35,13 +33,6 @@ const SearchSection: React.FC<IProps> = ({ searchDataFun }) => {
                      placeholder-gray-400 text-gray-700 transition-all"
         onChange={(e) => setTempSearchData(e.target.value)}
       />
-      <button
-        className="px-6 py-2.5 bg-violet-600 text-white font-semibold rounded-lg 
-                           hover:bg-violet-700 active:scale-95 transition-all shadow-sm
-                           hover:shadow-md"
-      >
-        Search
-      </button>
     </div>
   );
 };

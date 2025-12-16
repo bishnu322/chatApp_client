@@ -45,17 +45,18 @@ export const ChatContextProvider: React.FC<IProps> = ({ children, user }) => {
   const getChat = async () => {
     try {
       if (!user) return null;
-      if (user?._id) {
+
+      const userId = user?._id;
+
+      if (userId) {
         setIsUserChatLoading(true);
         const response = await axios.get(
-          `http://localhost:3000/api/chat/${user._id}`
+          `http://localhost:3000/api/chat/${userId}`
         );
 
         if (response.data.success) {
           setChat(response.data.data);
           setIsUserChatLoading(false);
-
-          console.log(response.data.data);
         }
       }
     } catch (error) {
@@ -63,7 +64,6 @@ export const ChatContextProvider: React.FC<IProps> = ({ children, user }) => {
     }
   };
 
-  console.log({ user });
   useEffect(() => {
     getChat();
 
@@ -76,7 +76,6 @@ export const ChatContextProvider: React.FC<IProps> = ({ children, user }) => {
       withCredentials: true,
     });
 
-    console.log({ newSocket });
     setSocket(newSocket);
 
     return () => {
@@ -120,6 +119,7 @@ export const ChatContextProvider: React.FC<IProps> = ({ children, user }) => {
 // eslint-disable-next-line react-refresh/only-export-components
 export const useChat = () => {
   const context = useContext(ChatContext);
+
   if (!context)
     throw new Error("useChat must be used within ChatContextProvider");
   return context;

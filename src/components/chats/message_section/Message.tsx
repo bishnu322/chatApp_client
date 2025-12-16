@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
 import { useChat } from "../../../context/chatContext";
 
@@ -46,6 +46,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData, onBack }) => {
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [textMessage, setTextMessage] = useState("");
+  const messageContainerRef = useRef<HTMLDivElement | null>(null);
 
   // finding friend
   const friend = fetchingChatData?.users.find((u) => u._id !== user?._id);
@@ -93,6 +94,14 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData, onBack }) => {
     };
   }, [socket, fetchingChatData?._id]);
 
+  useEffect(() => {
+    if (messageContainerRef.current === null) return;
+
+    messageContainerRef.current?.scrollTo({
+      top: messageContainerRef.current.scrollHeight,
+    });
+  }, [messages]);
+
   // sending message
   const creatingMessage = async () => {
     if (!textMessage.trim() || !user || !fetchingChatData) return;
@@ -131,7 +140,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData, onBack }) => {
   if (!fetchingChatData) {
     return (
       <div className="h-full flex items-center justify-center text-gray-500">
-        Select a chat to start messaging 💬
+        Select a chat to start messaging
       </div>
     );
   }
@@ -158,12 +167,15 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData, onBack }) => {
       </div>
 
       {/* message box */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-100">
+      <div
+        ref={messageContainerRef}
+        className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-100"
+      >
         {isLoading && <div>Loading messages...</div>}
 
         {!isLoading && messages.length === 0 && (
           <div className="text-center text-gray-500">
-            No messages yet. Start chatting 👋
+            No messages yet. Start chatting
           </div>
         )}
 
