@@ -1,10 +1,10 @@
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import { useAuth } from "../../../context/AuthContext";
+import { useChat } from "../../../context/chatContext";
 
 const img =
   "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
-
 interface IBaseTimestamps {
   _id: string;
   createdAt: string;
@@ -32,18 +32,21 @@ interface IMessageProps {
   fetchingChatData?: IChat | null;
 }
 
+interface ISocketMessage {
+  senderId: string;
+  message: IMessage;
+}
+
 const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
   const { user } = useAuth();
+  const { socket } = useChat();
 
   const [messages, setMessages] = useState<IMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [textMessage, setTextMessage] = useState("");
-
-  //  finding friend data to show friends userName in  heading
+  // finding friend
   const friend = fetchingChatData?.users.find((u) => u._id !== user?._id);
-  const senderId = user?._id;
-
-  //  fetching message using chat id
+  // fetching all the message  related to chatId
   const fetchMessages = useCallback(async (chatId?: string) => {
     if (!chatId) return;
 
@@ -54,23 +57,75 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
         { withCredentials: true }
       );
 
-      if (!response.data?.success) return;
-
-      setMessages(response.data.data);
+      if (response.data?.success) {
+        setMessages(response.data.data);
+      }
     } catch (error) {
-      console.error("fetching user message failed!", error);
+      console.log("fetching messages failed", error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
+  //  loading when chat are changing
   useEffect(() => {
     if (fetchingChatData?._id) {
       fetchMessages(fetchingChatData._id);
     }
   }, [fetchingChatData?._id, fetchMessages]);
 
-  // if fetching Chat Data is empty
+  // socket is receiving message
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on("getMessage", (data: ISocketMessage) => {
+      if (data.message.chatId._id === fetchingChatData?._id) {
+        setMessages((prev) => [...prev, data.message]);
+      }
+    });
+
+    return () => {
+      socket.off("getMessage");
+    };
+  }, [socket, fetchingChatData?._id]);
+
+  // sending message
+  const creatingMessage = async () => {
+    if (!textMessage.trim() || !user || !fetchingChatData) return;
+
+    try {
+      const response = await axios.post(
+        `http://localhost:3000/api/message`,
+        {
+          senderId: user._id,
+          chatId: fetchingChatData._id,
+          text: textMessage,
+        },
+        { withCredentials: true }
+      );
+
+      if (!response.data.success) return;
+
+      const newMessage: IMessage = response.data.data;
+
+      // ✅ Update sender UI instantly
+      setMessages((prev) => [...prev, newMessage]);
+      setTextMessage("");
+
+      // ✅ Send message via socket
+      if (friend?._id) {
+        socket?.emit("sendMessage", {
+          senderId: user._id,
+          receiverId: friend._id,
+          message: newMessage,
+        });
+      }
+    } catch (error) {
+      console.log("send message failed", error);
+    }
+  };
+
+  // when no chat is selected
   if (!fetchingChatData) {
     return (
       <div className="h-full flex items-center justify-center text-gray-500">
@@ -79,27 +134,9 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
     );
   }
 
-  // creating message
-
-  const creatingMessage = async (chatId: string, text: string) => {
-    try {
-      const response = await axios.post(
-        `http://localhost:3000/api/message`,
-        { senderId, chatId, text },
-        { withCredentials: true }
-      );
-
-      if (!response.data.success) return null;
-    } catch (error) {
-      console.log("unable to create message", error);
-    }
-  };
-
-  console.log({ textMessage });
-
   return (
     <div className="flex flex-col h-screen">
-      {/* HEADER */}
+      {/* header ui */}
       <div className="flex gap-4 bg-white px-6 py-4 items-center border-b">
         <img src={img} className="w-12 h-12 rounded-full" />
         <div>
@@ -110,7 +147,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
         </div>
       </div>
 
-      {/* MESSAGES */}
+      {/* message ui */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-100">
         {isLoading && <div>Loading messages...</div>}
 
@@ -126,7 +163,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
           return (
             <div
               key={msg._id}
-              className={`flex items-end gap-3 ${
+              className={`flex gap-3 ${
                 isOwnMessage ? "justify-end" : "justify-start"
               }`}
             >
@@ -143,11 +180,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
                   }`}
               >
                 <p>{msg.text}</p>
-                <span
-                  className={`block text-xs mt-1 ${
-                    isOwnMessage ? "text-violet-200" : "text-gray-400"
-                  }`}
-                >
+                <span className="block text-xs mt-1 opacity-70">
                   {new Date(msg.createdAt).toLocaleTimeString()}
                 </span>
               </div>
@@ -160,18 +193,21 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData }) => {
         })}
       </div>
 
-      {/* INPUT */}
+      {/* input ui */}
       <div className="flex gap-3 bg-white px-6 py-4 border-t">
         <input
           type="text"
           placeholder="Type a message..."
-          defaultValue={textMessage}
           className="flex-1 px-4 py-2 border rounded-lg"
+          value={textMessage}
           onChange={(e) => setTextMessage(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && creatingMessage()}
         />
+
+        {/* button for sending message  */}
         <button
           className="px-6 py-2 bg-violet-600 text-white rounded-lg"
-          onClick={() => creatingMessage(fetchingChatData._id, textMessage)}
+          onClick={creatingMessage}
         >
           Send
         </button>

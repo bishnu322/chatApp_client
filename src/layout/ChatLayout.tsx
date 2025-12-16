@@ -51,9 +51,9 @@ const ChatLayout = () => {
 
   return (
     <div className="h-screen w-full">
-      <div className="grid grid-cols-5 h-screen">
+      <div className="grid grid-cols-4 h-screen">
         {/* Left panel: user list */}
-        <div className="col-span-2 border-r">
+        <div className="col-span-1 border-r">
           <UserData fetchingSingleChat={fetchingSingleChat} />
         </div>
 
