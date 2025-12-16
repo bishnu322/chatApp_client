@@ -138,9 +138,9 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData, onBack }) => {
 
   return (
     <div className="flex flex-col h-screen">
-      {/* ================= HEADER UI (UNCHANGED + BACK BUTTON) ================= */}
+      {/* header  */}
       <div className="flex gap-4 bg-white px-6 py-4 items-center border-b">
-        {/* ✅ Mobile Back Button */}
+        {/* Mobile Back Button */}
         {onBack && (
           <button onClick={onBack} className="md:hidden text-lg font-semibold">
             ←
@@ -157,7 +157,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData, onBack }) => {
         </div>
       </div>
 
-      {/* ================= MESSAGE UI (UNCHANGED) ================= */}
+      {/* message box */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-100">
         {isLoading && <div>Loading messages...</div>}
 
@@ -203,7 +203,7 @@ const Message: React.FC<IMessageProps> = ({ fetchingChatData, onBack }) => {
         })}
       </div>
 
-      {/* ================= INPUT UI (UNCHANGED) ================= */}
+      {/* input section */}
       <div className="flex gap-3 bg-white px-6 py-4 border-t">
         <input
           type="text"
